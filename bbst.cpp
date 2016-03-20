@@ -38,11 +38,14 @@ class RBT
 	
 		RBT(){cout<<"RBT constructor\n";root = NULL;}
 		void insert(TreeNode*);
-		void del(TreeNode*);
+		void del(int);
+		void delHelper(TreeNode*);
 		void fixInsert(TreeNode*);
+		void fixDelete(TreeNode*);
 		void LeftRotate(TreeNode*);
 		void RightRotate(TreeNode*);
-		void transplant(TreeNode*.TreeNode*);
+		void transplant(TreeNode*,TreeNode*);
+		TreeNode* inorderSuccessor(TreeNode*);
 };
 
 //==================== INORDER ======================================
@@ -230,6 +233,8 @@ void RBT::fixInsert(TreeNode *node)
 
 void RBT::transplant(TreeNode* u, TreeNode* v)
 {
+
+	cout<<"Inside transplant\n";
 	if(u->parent == NULL)
 		root = v;
 	
@@ -238,24 +243,176 @@ void RBT::transplant(TreeNode* u, TreeNode* v)
 
 	else
 		u->parent->right = v;
+
+	cout<<"hi\n";
+	if(v != NULL)
+		v->parent = u->parent;
+	cout<<"hello\n";
 }
 
+//===================== INORDER SUCCESSOR ===========================
+
+TreeNode* RBT::inorderSuccessor(TreeNode* z)
+{
+	cout<<"Inside inorderSuccessor\n";
+	TreeNode *temp = z->right;	
+	while(temp->left != NULL)
+	{
+		temp = temp->left;
+	}
+	return temp;
+}
 
 //===================== DELETE ======================================
 
-void RBT::del(TreeNode* node)
+void RBT::del(int val)
 {
+
+	cout<<"Inside del\n";
+	TreeNode* temp = root;
+
+	while(temp->id != val)		
+	{
+		if(val < temp->id)
+			temp  = temp->left;
+
+		else
+			temp = temp->right;
+	}
+
+	delHelper(temp);
+}
+
+void RBT::delHelper(TreeNode* z)
+{
+
+	cout<<"Inside delHelper\n"<<z->id<<"\n";
+	TreeNode* y = z;
+	TreeNode* x;
+	string y_original_color = y->color;
+
+	// Checking for the 0 or 1 child case
+	if(z->left == NULL)
+	{
+		x = z->right;
+		transplant(z,z->right);
+	}
+
+	else if(z->right == NULL)
+	{
+		x = z->left;
+		transplant(z,z->left);
+	}
+
+	// CASE : More than 1 child
+	else
+	{
+		y = inorderSuccessor(z);
+		y_original_color = y->color;
+		x = y->right;
+		if(y->parent == z)
+			x->parent = y;
+
+		else
+		{
+			transplant(y,y->right);
+			y->right = z->right;
+			y->right->parent = y;
+		}
+
+		transplant(z,y);
+		y->left = z->left;
+		y->left->parent = y;
+		y->color = z->color;
+	}
+
+	if(y_original_color == "BLACK")
+		fixDelete(x);
+
 	
 }
 
+//========================== FIX DELETE ============================
 
+void RBT::fixDelete(TreeNode* x)
+{
 
+	TreeNode* sibling_x;
+	while(x != root && x->color == "BLACK")
+	{
+		if(x == x->parent->left)
+		{
+			sibling_x = x->parent->right;
+			if(sibling_x->color == "RED")
+			{
+				sibling_x->color = "BLACK";
+				x->parent->color = "RED";
+				LeftRotate(x->parent);
+				sibling_x = x->parent->right;
+			}
 
+			if(sibling_x->left->color == "BLACK" && sibling_x->right->color == "BLACK")
+			{
+				sibling_x->color = "RED";
+				x = x->parent;
+			}
 
+			else 
+			{
+				if(sibling_x->right->color == "BLACK")
+				{
+					sibling_x->left->color == "BLACK";
+					sibling_x->color == "RED";
+					RightRotate(sibling_x);
+					sibling_x = x->parent->right;
+				}
 
+				sibling_x->color = x->parent->color;
+				x->parent->color = "BLACK";
+				sibling_x->right->color = "BLACK";
+				LeftRotate(x->parent);
+				x = root;
+			}
+		}
 
+		else
+		{
+			sibling_x = x->parent->left;
+			if(sibling_x->color == "RED")			
+			{
+				sibling_x->color = "BLACK";
+				x->parent->color = "RED";
+				RightRotate(x->parent);
+				sibling_x = x->parent->left;
+			}
 
+			if(sibling_x->right->color == "BLACK" && sibling_x->left->color == "BLACK")
+			{
+				sibling_x->color = "RED";
+				x = x->parent;
+			}
 
+			else
+			{
+				if(sibling_x->left->color == "BLACK")
+				{
+					sibling_x->right->color = "BLACK";
+					sibling_x->color = "RED";
+					LeftRotate(sibling_x);
+					sibling_x = x->parent->left;
+				}
+
+				sibling_x->color = x->parent->color;
+				x->parent->color = "BLACK";
+				sibling_x->left->color = "BLACK";
+				RightRotate(x->parent);
+				x = root;
+			}
+		}
+	}
+
+	x->color = "BLACK";
+}
 
 
 int main(int argc, char *argv[])
@@ -334,9 +491,11 @@ int main(int argc, char *argv[])
 	TreeNode *node = new TreeNode(4,1);
 	tree.insert(node);
 	cout<<"===========================================\n";*/
-	//inorder(tree.root);
+	inorder(tree.root);
 	//cout<<endl;
 
+	//tree.del(3);
+	//inorder(tree.root);
 	cout << "Tree insert time = " << (double(end - start) / CLOCKS_PER_SEC) << " seconds" << '\n';
 	cout << "Tree traversal time = " << (double(finalend - end) / CLOCKS_PER_SEC) << " seconds" << '\n';
 	
