@@ -53,7 +53,11 @@ class RBT
 		TreeNode* findNode(int);
 		TreeNode* inorderSuccessor(TreeNode*);
 		void Increase(int,int);
-		
+		void Reduce(int,int);
+		void Count(int);
+		void InRange(int,int);
+		void Next(int);
+		void Previous(int);
 };
 
 TreeNode::TreeNode(int id, int count)
@@ -88,7 +92,7 @@ TreeNode* RBT::findNode(int val)
 	{
 		if(temp->id == val)
 		{
-			cout<<"val found\n";
+			//cout<<"val found\n";
 			return temp;
 		}
 
@@ -98,7 +102,7 @@ TreeNode* RBT::findNode(int val)
 		else
 			temp = temp->right;
 	}
-	cout<<"val not found\n";
+	//cout<<"val not found\n";
 	return nil;
 }
 
@@ -514,28 +518,154 @@ void RBT::fixDelete(TreeNode* x)
 	x->color = "BLACK";
 }
 
+//======================== INCREASE ===============================
+
+void RBT::Increase(int theID, int m)
+{
+	TreeNode *event = findNode(theID);
+
+	if(event->count == -1)
+	{
+		TreeNode *newEvent = new TreeNode(theID,m);
+		insert(newEvent);
+		cout<<m<<endl;
+	}
+
+	else
+	{
+		event->count += m;
+		cout<<event->count<<endl;
+	}
+	
+}
+
+//================= REDUCE =========================
+
+void RBT::Reduce(int theID, int m)
+{
+	TreeNode *event = findNode(theID);
+	if(event->count == -1)
+	{
+		cout<<"0\n";
+	}
+
+	else
+	{
+		event->count -= m;
+		if(event->count <= 0)
+		{
+			del(theID);
+			cout<<"0\n";
+		}
+
+		else
+			cout<<event->count<<endl;
+	}	
+}
+
+//================== COUNT ===============================
+
+void RBT::Count(int theID)
+{
+	TreeNode* event = findNode(theID);
+
+	if(event->count == -1)
+		cout<<"0\n";
+
+	else
+		cout<<event->count<<endl;
+}
+
+//=================== NEXT ==============================
+
+void RBT::Next(int theID)
+{
+	TreeNode *currentEvent = findNode(theID);
+	if(currentEvent->count == -1)
+		cout<<"0 0\n";
+
+	else
+	{
+		TreeNode *nextEvent = inorderSuccessor(currentEvent);
+		if(nextEvent->count == -1)
+			cout<<"0 0\n";
+
+		else
+			cout<<nextEvent->id<<" "<<nextEvent->count<<endl;
+	}
+}
+
+//================== PREVIOUS =============================
+
+void RBT::Previous(int theID)
+{
+	TreeNode *curEvent = findNode(theID);
+	if(curEvent->count == -1)
+		cout<<"0 0\n";
+
+	else
+	{
+	
+		if(curEvent->left->count == -1)
+		{
+			if(curEvent == curEvent->parent->right)
+				cout<<curEvent->parent->id<<" "<<curEvent->parent->count<<endl;
+
+			else
+			{
+				if(curEvent->id < root->id)
+					cout<<"0 0\n";
+
+				else if(curEvent->id == root->id)
+					cout<<"0 0\n";
+
+				else
+				{
+					if(curEvent->parent == curEvent->parent->parent->left)
+						cout<<root->id<<" "<<root->count<<endl;
+
+					else if(curEvent->parent == curEvent->parent->parent->right)
+						cout<<curEvent->parent->parent->id<<" "<<curEvent->parent->parent->count<<endl;
+				}
+			}
+		}
+
+		else
+		{
+			TreeNode *t = curEvent->left;
+			while(t->right->count != -1)
+				t = t->right;
+
+			cout<<t->id<<" "<<t->count<<endl;
+		}
+
+	}
+}
+
+//======================= IN RANGE =============================
+
+void RBT::InRange(int ID1, int ID2)
+{
+	cout<<ID1<<" "<<ID2<<endl;
+	if(ID1 == ID2)
+	{
+		TreeNode *event = findNode(ID1);
+		cout<<event->count<<endl;
+	}
+
+	
+}
+
 
 int main(int argc, char *argv[])
 {
-	//cout<<"start\n";
-	//TreeNode temp;
-	
-	 clock_t start, end, finalend;
-
+	clock_t start, end, finalend;
     	start = clock();
-    	
-
 	RBT tree;
-
 	int numNodes;
-
 	string input_file = argv[1];
-	//cout<<input_file<<endl;
-
 	const char* input = input_file.c_str();
-
 	ifstream read_file;
-	
 	
 	read_file.open(input);
 	if(read_file.is_open())
@@ -545,10 +675,13 @@ int main(int argc, char *argv[])
 		string id_str = "";
 		string count_str = "";	
 		getline(read_file, line);
-		while(getline(read_file, line))
+		size_t sz;
+		numNodes = stoi(line,&sz);
+		//cout<<numNodes<<endl;
+		for(int loopIndex=0; loopIndex < numNodes; loopIndex++)
 		{
-			//cout<<line<<endl;
-			
+			getline(read_file, line);
+			//cout<<line<<endl;	
 			int id,count;
 			int i=0;
 			while(line[i] != ' ')
@@ -556,7 +689,7 @@ int main(int argc, char *argv[])
 				id_str = id_str + line[i];
 				i++;
 			}
-			size_t sz;
+			//size_t sz;
 			id = stoi(id_str,&sz);
 			id_str = "";
 			//cout<<id<<endl;
@@ -569,43 +702,128 @@ int main(int argc, char *argv[])
 			}
 			count = stoi(count_str, &sz);
 			count_str = "";
-			//cout<<count<<endl;
-
 			TreeNode *node = new TreeNode(id,count);
-			//cout<<node->id<<endl;
 			tree.insert(node);	
 		}
-		//cout<<"end of while in main\n";
+		
+		//tree.inorder(tree.root);
+		getline(read_file,line);
+		while(line != "quit")
+		{
+			//cout<<line<<endl;
+			string cmd = "";
+			string arg1 = "";
+			string arg2 = "";
+			
+			int i=0;
+			while(line[i] != ' ')
+			{
+				cmd += line[i];
+				i++;
+			}
+
+			if(cmd == "increase")
+			{
+				i++;
+				while(line[i] != ' ')
+				{
+					arg1 += line[i];
+					i++;
+				}
+				int arg_1 = stoi(arg1,&sz);
+				i++;
+				while(i < line.length())
+				{
+					arg2 += line[i];
+					i++;
+				}
+				int arg_2 = stoi(arg2,&sz);
+				tree.Increase(arg_1,arg_2);
+			}
+			else if(cmd == "reduce")
+			{
+				i++;
+				while(line[i] != ' ')
+				{
+					arg1 += line[i];
+					i++;
+				}
+				int arg_1 = stoi(arg1,&sz);
+				i++;
+				while(i < line.length())
+				{
+					arg2 += line[i];
+					i++;
+				}
+				int arg_2 = stoi(arg2,&sz);
+				tree.Reduce(arg_1,arg_2);
+			}
+			else if(cmd == "count")
+			{
+				i++;
+				while(i < line.length())
+				{
+					arg1 += line[i];
+					i++;
+				}
+				int arg_1 = stoi(arg1,&sz);
+				tree.Count(arg_1);
+			}
+			else if(cmd == "inrange")
+			{
+				i++;
+				while(line[i] != ' ')
+				{
+					arg1 += line[i];
+					i++;
+				}
+				int arg_1 = stoi(arg1,&sz);
+				i++;
+				while(i < line.length())
+				{
+					arg2 += line[i];
+					i++;
+				}
+				int arg_2 = stoi(arg2,&sz);
+				tree.InRange(arg_1,arg_2);
+			}
+			else if(cmd == "next")
+			{
+				i++;
+				while(i < line.length())
+				{
+					arg1 += line[i];
+					i++;
+				}
+				int arg_1 = stoi(arg1,&sz);
+				tree.Next(arg_1);
+			}
+			else if(cmd == "previous")
+			{
+				i++;
+				while(i < line.length())
+				{
+					arg1 += line[i];
+					i++;
+				}
+				int arg_1 = stoi(arg1,&sz);
+				tree.Previous(arg_1);
+			}
+			else
+				cout<<"Invalid command\n";
+
+			getline(read_file,line);
+		}
 	}
 
 	else
 	{
 		cout<<"Error : File open failed\n";
 	}
-
+	//tree.Previous(151);
 	
-	    end = clock();
+	end = clock();
 	
-	
-	//cout<<tree.root->left->color<<endl;
-
-	tree.inorder(tree.root);
-
-	/*TreeNode *node = tree.findNode(197);
-
-	tree.del(197);
-	tree.inorder(tree.root);
-
-	TreeNode *node1 = tree.findNode(197);
-	/*tree.del(5);
-	tree.inorder(tree.root);
-
-	tree.del(1);
-	tree.inorder(tree.root);
-
-	cout<<tree.root->right->id<<endl;
-
-	cout<<tree.root->id<<endl;*/
 	cout << "Tree insert time = " << (double(end - start) / CLOCKS_PER_SEC) << " seconds" << '\n';
 	cout << "Tree traversal time = " << (double(finalend - end) / CLOCKS_PER_SEC) << " seconds" << '\n';
 	
