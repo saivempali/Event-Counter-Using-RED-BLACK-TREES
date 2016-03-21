@@ -2,9 +2,6 @@
 #include<string>
 #include<fstream>
 #include<ctime>
-//#include "TreeNode.h"
-//#include "RBT.h"
-
 
 using namespace std;
 
@@ -23,24 +20,25 @@ class TreeNode
 };
 
 
-
 //==================== RED BLACK TREE ==============================
 class RBT
 {
 	public:
 		TreeNode *root;
-		TreeNode* nil;
+		TreeNode *nil;
+		TreeNode *rightmost;
 	
 		RBT()
 		{
-			//cout<<"RBT constructor\n";
 			nil = new TreeNode;
 			nil->left = nil->right = nil->parent = nil;
 			nil->id = -1;
 			nil->count = -1;
 			nil->color = "BLACK";
 			root = nil;
+			rightmost = root;
 		}
+		void buildTree(int,int);
 		void insert(TreeNode*);
 		void del(int);
 		void delHelper(TreeNode*);
@@ -50,9 +48,7 @@ class RBT
 		void RightRotate(TreeNode*);
 		void transplant(TreeNode*,TreeNode*);
 		void inorder(TreeNode*);
-		TreeNode* findNode(int);
-		TreeNode* inorderSuccessor(TreeNode*);
-		TreeNode* inorderPredecessor(TreeNode*);
+		
 		void Increase(int,int);
 		void Reduce(int,int);
 		void Count(int);
@@ -60,8 +56,13 @@ class RBT
 		void Next(int);
 		void Previous(int);
 		void InRangeHelper(TreeNode*,int,int);
+
+		TreeNode* findNode(int);
+		TreeNode* inorderSuccessor(TreeNode*);
+		TreeNode* inorderPredecessor(TreeNode*);
 };
 
+// TREE NODE CONSTRUCTOR:
 TreeNode::TreeNode(int id, int count)
 {
 	RBT rbt;
@@ -75,8 +76,6 @@ TreeNode::TreeNode(int id, int count)
 
 void RBT::inorder(TreeNode *root)
 {
-
-	//cout<<"inside inorder\n";
 	if(root->count == -1)
 		return;
 
@@ -741,6 +740,17 @@ void RBT::InRange(int ID1, int ID2)
 	
 }
 
+//===================== BUILD TREE =========================
+
+void RBT::buildTree(int id, int count)
+{
+	TreeNode *newNode = new TreeNode(id,count);
+	rightmost->right = newNode;
+	newNode->parent = rightmost;
+	rightmost = newNode;
+	fixInsert(newNode);
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -787,18 +797,15 @@ int main(int argc, char *argv[])
 			}
 			count = stoi(count_str, &sz);
 			count_str = "";
-			TreeNode *node = new TreeNode(id,count);
-			tree.insert(node);	
+			//TreeNode *node = new TreeNode(id,count);
+			//tree.insert(node);	
+			tree.buildTree(id,count);
 		}
 
-		//TreeNode *node = new TreeNode(150,1);
-		//tree.insert(node);
-		//TreeNode *t = tree.findNode(150);
-		//tree.Previous(150);
-		//cout<<t->parent->parent->parent->parent->id<<endl;
+		//cin>>line;
 		
-		//tree.inorder(tree.root);
-		getline(read_file,line);
+		getline(cin,line);
+		cout<<line<<endl;
 		while(line != "quit")
 		{
 			//cout<<line<<endl;
@@ -903,7 +910,8 @@ int main(int argc, char *argv[])
 			else
 				cout<<"Invalid command\n";
 
-			getline(read_file,line);
+			getline(cin,line);
+			
 		}
 	}
 
@@ -911,7 +919,7 @@ int main(int argc, char *argv[])
 	{
 		cout<<"Error : File open failed\n";
 	}
-	tree.inorder(tree.root);
+	//tree.inorder(tree.root);
 	
 	end = clock();
 	
