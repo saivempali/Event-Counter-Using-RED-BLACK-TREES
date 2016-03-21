@@ -52,12 +52,14 @@ class RBT
 		void inorder(TreeNode*);
 		TreeNode* findNode(int);
 		TreeNode* inorderSuccessor(TreeNode*);
+		TreeNode* inorderPredecessor(TreeNode*);
 		void Increase(int,int);
 		void Reduce(int,int);
 		void Count(int);
 		void InRange(int,int);
 		void Next(int);
 		void Previous(int);
+		void InRangeHelper(TreeNode*,int,int);
 };
 
 TreeNode::TreeNode(int id, int count)
@@ -198,7 +200,7 @@ void RBT::RightRotate(TreeNode* y)
 void RBT::fixInsert(TreeNode *node)
 {
 
-	//cout<<"inside fix insert\n";
+	//cout<<"inside fix insert\n"<<node->id<<endl;
 	TreeNode *parent = nil;
 	TreeNode *grandparent = nil;
 	
@@ -338,6 +340,26 @@ TreeNode* RBT::inorderSuccessor(TreeNode* z)
 		temp = temp->left;
 	}
 	//cout<<"temp = "<<temp->id<<endl;
+	return temp;
+}
+
+TreeNode* RBT::inorderPredecessor(TreeNode* z)
+{
+	if(z->left->count == -1)
+	{
+		TreeNode *p = z->parent;
+		while(p->count != -1 && z == p->left)
+		{
+			z = p;
+			p = p->parent;
+		}
+		return p;
+	}
+
+	TreeNode *temp = z->left;
+	while(temp->right->count != -1)
+		temp = temp->right;
+
 	return temp;
 }
 
@@ -582,7 +604,18 @@ void RBT::Next(int theID)
 {
 	TreeNode *currentEvent = findNode(theID);
 	if(currentEvent->count == -1)
-		cout<<"0 0\n";
+	{
+		TreeNode *newEvent = new TreeNode(theID,1);
+		insert(newEvent);	
+		TreeNode *nextEvent = inorderSuccessor(newEvent);
+		if(nextEvent->count == -1)
+			cout<<"0 0\n";
+
+		else
+			cout<<nextEvent->id<<" "<<nextEvent->count<<endl;
+
+		del(theID);
+	}
 
 	else
 	{
@@ -601,12 +634,34 @@ void RBT::Previous(int theID)
 {
 	TreeNode *curEvent = findNode(theID);
 	if(curEvent->count == -1)
-		cout<<"0 0\n";
+	{
+		//cout<<"not there\n";
+		TreeNode *newEvent = new TreeNode(theID,1);
+		insert(newEvent);
+		//inorder(root);
+		TreeNode *prevEvent = inorderPredecessor(newEvent);
+		//cout<<prevEvent->id<<endl;
+		if(prevEvent->count == -1)
+			cout<<"0 0\n";
+
+		else
+			cout<<prevEvent->id<<" "<<prevEvent->count<<endl;
+		
+		del(theID);
+	}
 
 	else
 	{
+
+		TreeNode *prevEvent = inorderPredecessor(curEvent);
+		if(prevEvent->count == -1)
+			cout<<"0 0\n";
+
+		else
+			cout<<prevEvent->id<<" "<<prevEvent->count<<endl;
+		
 	
-		if(curEvent->left->count == -1)
+		/*if(curEvent->left->count == -1)
 		{
 			if(curEvent == curEvent->parent->right)
 				cout<<curEvent->parent->id<<" "<<curEvent->parent->count<<endl;
@@ -637,20 +692,50 @@ void RBT::Previous(int theID)
 				t = t->right;
 
 			cout<<t->id<<" "<<t->count<<endl;
-		}
+		}*/
 
 	}
+}
+
+int total = 0;
+
+void RBT::InRangeHelper(TreeNode* root, int id1, int id2)
+{
+
+	//cout<<total<<endl;
+	if(root->count == -1)
+		return;
+
+	if(id1 < root->id)
+		InRangeHelper(root->left,id1,id2);
+
+	if(id1 <= root->id && id2 >= root->id)
+	{
+		//cout<<total<<"  "<<root->count<<endl;
+		total += root->count;
+	}
+
+	if(id2 > root->id)
+		InRangeHelper(root->right,id1,id2);
+	
 }
 
 //======================= IN RANGE =============================
 
 void RBT::InRange(int ID1, int ID2)
 {
-	cout<<ID1<<" "<<ID2<<endl;
+	//cout<<ID1<<" "<<ID2<<endl;
 	if(ID1 == ID2)
 	{
 		TreeNode *event = findNode(ID1);
 		cout<<event->count<<endl;
+	}
+
+	else if(ID1 < ID2)
+	{
+		total = 0;
+		InRangeHelper(root,ID1,ID2);
+		cout<<total<<endl;
 	}
 
 	
@@ -705,6 +790,12 @@ int main(int argc, char *argv[])
 			TreeNode *node = new TreeNode(id,count);
 			tree.insert(node);	
 		}
+
+		//TreeNode *node = new TreeNode(150,1);
+		//tree.insert(node);
+		//TreeNode *t = tree.findNode(150);
+		//tree.Previous(150);
+		//cout<<t->parent->parent->parent->parent->id<<endl;
 		
 		//tree.inorder(tree.root);
 		getline(read_file,line);
@@ -820,7 +911,7 @@ int main(int argc, char *argv[])
 	{
 		cout<<"Error : File open failed\n";
 	}
-	//tree.Previous(151);
+	tree.inorder(tree.root);
 	
 	end = clock();
 	
