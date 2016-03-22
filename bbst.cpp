@@ -93,7 +93,6 @@ TreeNode* RBT::findNode(int val)
 	{
 		if(temp->id == val)
 		{
-			//cout<<"val found\n";
 			return temp;
 		}
 
@@ -103,7 +102,7 @@ TreeNode* RBT::findNode(int val)
 		else
 			temp = temp->right;
 	}
-	//cout<<"val not found\n";
+	
 	return nil;
 }
 
@@ -111,13 +110,12 @@ TreeNode* RBT::findNode(int val)
 void RBT::insert(TreeNode *node)
 {
 
-	//cout<<"inside insert\n";
+	
 	TreeNode *y = nil;
 	TreeNode *x = root;
 
 	while(x->count != -1)
 	{
-		//cout<<"while in insert\n";
 		y = x;
 		if(node->id < x->id)
 			x = x->left;
@@ -136,13 +134,7 @@ void RBT::insert(TreeNode *node)
 	else
 		y->right = node;
 
-	//cout<<"After inserting "<<node->id<<endl;
-	//inorder(root);
-	//cout<<root->id<<"  "<<root->color<<endl;
 	fixInsert(node);
-	//cout<<"After fixing "<<node->id<<endl;
-	//inorder(root);
-	//cout<<root->id<<endl;
 }
 
 //===================== LEFT ROTATE ======================================
@@ -198,23 +190,16 @@ void RBT::RightRotate(TreeNode* y)
 
 void RBT::fixInsert(TreeNode *node)
 {
-
-	//cout<<"inside fix insert\n"<<node->id<<endl;
 	TreeNode *parent = nil;
 	TreeNode *grandparent = nil;
-	
-	//cout<<"before while\n"<<node->parent->color<<endl;
 
 	while(node->parent->color == "RED")
 	{
-		//cout<<"enterd while\n";
 		parent = node->parent;
 		grandparent = node->parent->parent;
 
-		//cout<<node->id<<"  "<<parent->id<<"  "<<grandparent->id<<endl;
 		if(parent == grandparent->left)
 		{
-			//cout<<"entered main if\n";
 			TreeNode *uncle = grandparent->right;
 
 			if(uncle != nil && uncle->color == "RED")	
@@ -244,84 +229,61 @@ void RBT::fixInsert(TreeNode *node)
 
 		else
 		{
-
-			//cout<<"enterd else\n";
 			TreeNode *uncle = grandparent->left;
 
 			if(uncle != nil && uncle->color == "RED")	
 			{
-				//cout<<"entered if in else\n";
 				grandparent->color = "RED";
 				parent->color = "BLACK";
 				uncle->color = "BLACK";
-				node = grandparent;
-				
+				node = grandparent;	
 			}
 
 			else
 			{
-				//cout<<"entered else in else\n";
 				if(node == parent->left)
 				{
 					RightRotate(parent);
 					node = parent;
 					parent = node->parent;
 				}
-				//cout<<parent->color<<","<<parent->id<<"  "<<grandparent->color<<","<<grandparent->id<<endl;
+				
 				LeftRotate(grandparent);
-				//cout<<parent->color<<","<<parent->id<<"  "<<grandparent->color<<","<<grandparent->id<<endl;
 				string temp = parent->color;
 				parent->color = grandparent->color;
 				grandparent->color = temp;
-				//cout<<parent->color<<","<<parent->id<<"  "<<grandparent->color<<","<<grandparent->id<<endl;
 				node = parent;
-			
 			}
 		}
 	}
-
-	//cout<<root->id<<endl;
 	root->color = "BLACK";
-	//cout<<root->color<<endl;
 }
 
 //===================== TRANSPLANT ==================================
 
 void RBT::transplant(TreeNode* u, TreeNode* v)
 {
-
-	//cout<<u->id<<"  "<<v->id<<endl;
-	//cout<<"Inside transplant\n";
 	if(u->parent->count == -1)
 	{
-		//cout<<"modifying root inside transplant\n";
 		root = v;
 	}
 	
 	else if(u == u->parent->left)
 	{
-		//cout<<"CASE : left inside transplant\n"<<u->parent->id<<endl;
 		u->parent->left = v;
 	}
 
 	else
 	{
-		//cout<<"CASE : right inside transplant\n";
 		u->parent->right = v;
 	}
-
-	
 	v->parent = u->parent;
-	//cout<<v->id<<"  "<<u->parent->id<<endl;
-	
 }
 
 //===================== INORDER SUCCESSOR ===========================
 
 TreeNode* RBT::inorderSuccessor(TreeNode* z)
 {
-	//cout<<"Inside inorderSuccessor\n"<<z->id<<"  "<<z->right->id<<endl;
-	
 	if(z->right->count == -1)	
 	{
 		TreeNode *p = z->parent;
@@ -338,7 +300,6 @@ TreeNode* RBT::inorderSuccessor(TreeNode* z)
 	{
 		temp = temp->left;
 	}
-	//cout<<"temp = "<<temp->id<<endl;
 	return temp;
 }
 
@@ -366,8 +327,6 @@ TreeNode* RBT::inorderPredecessor(TreeNode* z)
 
 void RBT::del(int val)
 {
-
-	//cout<<"Inside del\n";
 	TreeNode* temp = root;
 
 	while(temp->id != val)		
@@ -384,16 +343,11 @@ void RBT::del(int val)
 
 void RBT::delHelper(TreeNode* z)
 {
-
-	//cout<<"Inside delHelper\n"<<z->left->id<<"\n";
 	TreeNode* y = z;
 	TreeNode* x;
 	string y_original_color = y->color;
-
-	// Checking for the 0 or 1 child case
 	if(z->left->count == -1)
 	{
-		//cout<<"Checking for the 0 or 1 child case in IF\n";
 		x = z->right;
 		transplant(z,z->right);
 	}
@@ -407,65 +361,45 @@ void RBT::delHelper(TreeNode* z)
 	// CASE : More than 1 child
 	else
 	{
-		//cout<<"CASE : More than 1 child\n";
 		y = inorderSuccessor(z);
-		//cout<<"successor = "<<y->id<<endl;
 		y_original_color = y->color;
 		x = y->right;
 		if(y->parent == z)
 		{
-			//cout<<"entered if in else\n";
-			//if(x != NULL)
 			x->parent = y;
-			//else
-			//	cout<<"x is null\n";
 		}
 
 		else
 		{
-			//cout<<"calling trasnplant => y,y->right = "<<y->id<<","<<y->right->id<<endl;
 			transplant(y,y->right);
 			y->right = z->right;
 			y->right->parent = y;
 		}
-		//cout<<"calling transplant in more than 1 child after else\n";
+		
 		transplant(z,y);
-		//cout<<"after transplant\n";
 		y->left = z->left;
-		//cout<<y->left->id<<endl;
 		y->left->parent = y;
-		//cout<<y->left->parent->id<<endl;
 		y->color = z->color;
 	}
 
-	//cout<<"I'm here\n"<<y_original_color<<endl;
 	if(y_original_color == "BLACK")
 	{
-		//cout<<"calling fix delete\n";
 		fixDelete(x);
 	}
-	//cout<<"end of del\n";
-	
 }
 
 //========================== FIX DELETE ============================
 
 void RBT::fixDelete(TreeNode* x)
 {
-
-	//cout<<"entered fixDelete\n"<<x->id<<endl;
 	TreeNode* sibling_x;
 	while(x != root && x->color == "BLACK")
 	{
-
-		//cout<<"inside while in fix delete\n";
 		if(x == x->parent->left)
 		{
-			//cout<<"x is to the left\n";
 			sibling_x = x->parent->right;
 			if(sibling_x->color == "RED")
 			{
-				//cout<<"sibling is red\n";
 				sibling_x->color = "BLACK";
 				x->parent->color = "RED";
 				LeftRotate(x->parent);
@@ -474,15 +408,12 @@ void RBT::fixDelete(TreeNode* x)
 
 			if(sibling_x->left->color == "BLACK" && sibling_x->right->color == "BLACK")
 			{
-				//cout<<"INSIDE IF\n";
 				sibling_x->color = "RED";
 				x = x->parent;
 			}
 
 			else 
 			{
-
-				//cout<<"INSIDE ELSE\n";
 				if(sibling_x->right->color == "BLACK")
 				{
 					sibling_x->left->color == "BLACK";
@@ -534,8 +465,6 @@ void RBT::fixDelete(TreeNode* x)
 			}
 		}
 	}
-	
-//	if(x != NULL)
 	x->color = "BLACK";
 }
 
@@ -634,12 +563,9 @@ void RBT::Previous(int theID)
 	TreeNode *curEvent = findNode(theID);
 	if(curEvent->count == -1)
 	{
-		//cout<<"not there\n";
 		TreeNode *newEvent = new TreeNode(theID,1);
 		insert(newEvent);
-		//inorder(root);
 		TreeNode *prevEvent = inorderPredecessor(newEvent);
-		//cout<<prevEvent->id<<endl;
 		if(prevEvent->count == -1)
 			cout<<"0 0\n";
 
@@ -658,50 +584,15 @@ void RBT::Previous(int theID)
 
 		else
 			cout<<prevEvent->id<<" "<<prevEvent->count<<endl;
-		
-	
-		/*if(curEvent->left->count == -1)
-		{
-			if(curEvent == curEvent->parent->right)
-				cout<<curEvent->parent->id<<" "<<curEvent->parent->count<<endl;
-
-			else
-			{
-				if(curEvent->id < root->id)
-					cout<<"0 0\n";
-
-				else if(curEvent->id == root->id)
-					cout<<"0 0\n";
-
-				else
-				{
-					if(curEvent->parent == curEvent->parent->parent->left)
-						cout<<root->id<<" "<<root->count<<endl;
-
-					else if(curEvent->parent == curEvent->parent->parent->right)
-						cout<<curEvent->parent->parent->id<<" "<<curEvent->parent->parent->count<<endl;
-				}
-			}
-		}
-
-		else
-		{
-			TreeNode *t = curEvent->left;
-			while(t->right->count != -1)
-				t = t->right;
-
-			cout<<t->id<<" "<<t->count<<endl;
-		}*/
-
 	}
 }
 
 int total = 0;
 
+//================== IN RANGE HELPER ===========================
+
 void RBT::InRangeHelper(TreeNode* root, int id1, int id2)
 {
-
-	//cout<<total<<endl;
 	if(root->count == -1)
 		return;
 
@@ -710,7 +601,6 @@ void RBT::InRangeHelper(TreeNode* root, int id1, int id2)
 
 	if(id1 <= root->id && id2 >= root->id)
 	{
-		//cout<<total<<"  "<<root->count<<endl;
 		total += root->count;
 	}
 
@@ -723,7 +613,6 @@ void RBT::InRangeHelper(TreeNode* root, int id1, int id2)
 
 void RBT::InRange(int ID1, int ID2)
 {
-	//cout<<ID1<<" "<<ID2<<endl;
 	if(ID1 == ID2)
 	{
 		TreeNode *event = findNode(ID1);
@@ -754,8 +643,8 @@ void RBT::buildTree(int id, int count)
 
 int main(int argc, char *argv[])
 {
-	clock_t start, end, finalend;
-    	start = clock();
+//	clock_t start, end, finalend;
+//    	start = clock();
 	RBT tree;
 	int numNodes;
 	string input_file = argv[1];
@@ -765,18 +654,15 @@ int main(int argc, char *argv[])
 	read_file.open(input);
 	if(read_file.is_open())
 	{
-		//cout<<"file opened\n";
 		string line = "";
 		string id_str = "";
 		string count_str = "";	
 		getline(read_file, line);
 		size_t sz;
 		numNodes = stoi(line,&sz);
-		//cout<<numNodes<<endl;
 		for(int loopIndex=0; loopIndex < numNodes; loopIndex++)
 		{
 			getline(read_file, line);
-			//cout<<line<<endl;	
 			int id,count;
 			int i=0;
 			while(line[i] != ' ')
@@ -784,10 +670,8 @@ int main(int argc, char *argv[])
 				id_str = id_str + line[i];
 				i++;
 			}
-			//size_t sz;
 			id = stoi(id_str,&sz);
 			id_str = "";
-			//cout<<id<<endl;
 
 			i++;
 			while(i < line.length())
@@ -797,18 +681,13 @@ int main(int argc, char *argv[])
 			}
 			count = stoi(count_str, &sz);
 			count_str = "";
-			//TreeNode *node = new TreeNode(id,count);
-			//tree.insert(node);	
 			tree.buildTree(id,count);
 		}
-
-		//cin>>line;
 		
 		getline(cin,line);
 		cout<<line<<endl;
 		while(line != "quit")
 		{
-			//cout<<line<<endl;
 			string cmd = "";
 			string arg1 = "";
 			string arg2 = "";
@@ -910,8 +789,7 @@ int main(int argc, char *argv[])
 			else
 				cout<<"Invalid command\n";
 
-			getline(cin,line);
-			
+			getline(cin,line);	
 		}
 	}
 
@@ -919,12 +797,11 @@ int main(int argc, char *argv[])
 	{
 		cout<<"Error : File open failed\n";
 	}
-	//tree.inorder(tree.root);
 	
-	end = clock();
+//	end = clock();
 	
-	cout << "Tree insert time = " << (double(end - start) / CLOCKS_PER_SEC) << " seconds" << '\n';
-	cout << "Tree traversal time = " << (double(finalend - end) / CLOCKS_PER_SEC) << " seconds" << '\n';
+//	cout << "Tree insert time = " << (double(end - start) / CLOCKS_PER_SEC) << " seconds" << '\n';
+//	cout << "Tree traversal time = " << (double(finalend - end) / CLOCKS_PER_SEC) << " seconds" << '\n';
 	
 
 	return 0;
